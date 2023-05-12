@@ -2,11 +2,16 @@ import basicAuth from "basic-auth";
 import {credentials} from "../basic/credentials.js"
 export const verifyBasic = (req, res, next) => {
     const auth = basicAuth(req);
-    if(!auth || !checkAuth(auth.name,auth.pass)){
+    if(!auth){
         res.set('WWW-Authenticate','Basic realm ="Area Segura"');
-        res.status(401).send('Nombre de usuario o constrasenia incorrectos');
+        res.status(401).send('Requiere auntentificación básica');
     }else{
-        next();
+        if(!checkAuth(auth.name,auth.pass)){
+            res.set('WWW-Authenticate','Basic realm ="Area Segura"');
+            res.status(401).send('Nombre de usuario o constrasenia incorrectos');
+        }else{
+            next();
+        }
     }
 };
 
