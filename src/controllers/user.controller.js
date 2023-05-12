@@ -2,73 +2,112 @@ import {database} from "../schema/connection.js";
 
 const user = "User"
 
-export const registerStudent = (values) =>
-    Promise.resolve(
+export const registerUser = (req,otp,registerTime) =>{
+    const {
+        names,
+        surnames,
+        phone,
+        password
+    } = req.body;
+    return Promise.resolve(
         database.query(
             "INSERT INTO `noteblog`.`usuario` (nombres, apellidos, tiempoRegistro, activo, celular, contrasenia,otp) VALUES (?, ?, ?, 0, ?, ?,?)",
             [
-                values.names,
-                values.surnames,
-                values.registerTime,
-                values.phone,
-                values.password,
-                values.otp
+                names,
+                surnames,
+                registerTime,
+                phone,
+                password,
+                otp
             ]
         )        
     );
+};
 
-export const validateOTP = (values) =>
+export const validateOTP = (req) =>{ //Maybe remove
+    const {
+        otp
+    } = req.body;
     Promise.resolve(
         database.query(
-            "SELECT * FROM usuario where usuario.otp = 1",
+            "SELECT * FROM usuario where usuario.otp = ?",
             [
                 values.otp
             ]
         )
     );
+};
 
-export const getUserByPhone = (values) =>
-    Promise.resolve(
+export const getUserByPhone = (req) =>{
+    const {
+        phone
+    } = req.body;
+    return Promise.resolve(
         database.query(
-            "SELECT usuario.* FROM usuario WHERE usuario.celular = ?",
+            "SELECT * FROM usuario WHERE celular = ?",
         [
-            values.celular
+            phone
         ]
         )   
     )
+};
 
-export const activateUser = (values) =>
-    Promise.resolve(
-        database.query("Update usuario SET activo = 1, tiempoActivacion = ? WHERE usuario.celular = ?",
+
+export const activateUser = (req, activatedTime) =>{
+    const {
+        phone,
+        otp
+    } = req.body;
+    return Promise.resolve(
+        database.query("Update usuario SET activo = 1, tiempoActivacion = ? WHERE usuario.celular = ? and usuario.otp = ?",
         [
-            values.phone,
-            values.activatedTime
+            activatedTime,
+            phone,
+            otp
         ]
         )            
     );
 
-export const login = (values) =>
-    Promise.resolve(
+}
+
+
+export const login = (req) =>{
+    const {
+        phone,
+        password
+    } = req.body;
+    return Promise.resolve(
         database.query(
-            "SELECT usuario.* FROM usuario WHERE usuario.celular = ? and usuario.contrasenia = ?",
+            "SELECT * FROM usuario WHERE usuario.celular = ? and usuario.contrasenia = ? and usuario.activo = 1",
         [
-            values.celular,
-            values.contrasenia
+            phone,
+            password
         ]
         )   
     );
+};
 
-export const updateUser = (values) =>
-    Promise.resolve(
+
+export const updateUser = (req) => {
+    const {
+        idUser,
+        names,
+        surnames,
+        password
+    } = req.body;
+    return Promise.resolve(
         database.query(
-            "UPDATE usuario SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), contrasenia = IFNULL(?,contrasenia)",
-            [
-                values.names,
-                values.surnames,
-                values.password
+            "UPDATE usuario SET nombres = IFNULL(?, nombres), apellidos = IFNULL(?, apellidos), contrasenia = IFNULL(?,contrasenia) WHERE idUsuario = ?",
+            [                
+                names,
+                surnames,
+                password,
+                idUser,
             ]
         )
     );
+};
+
 
 
 
